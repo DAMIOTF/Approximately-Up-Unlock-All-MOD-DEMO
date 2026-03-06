@@ -22,7 +22,7 @@ These screenshots show what the mod adds in the game:
 
 ## Installation
 
-1. Download MOD -> [Download Link](https://github.com/DAMIOTF/Approximately-Up-MOD/releases/download/Release/Mod.zip) or use [releases](https://github.com/DAMIOTF/Approximately-Up-MOD/releases/tag/Release)
+1. Download Mod files -> [releases](https://github.com/DAMIOTF/Approximately-Up-MOD/releases/tag/Release)
 2. Install MelonLoader first (link above).
 3. Open your game folder.
 4. Go to the `Mods` folder (create it if it does not exist).
@@ -92,3 +92,4 @@ dotnet msbuild .\ApproximatelyUpMOD.csproj /t:Build /p:Configuration=Release /p:
 ```
 
 Compiled files are generated in `bin/Release`.
+
