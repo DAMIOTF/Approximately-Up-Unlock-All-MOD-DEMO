@@ -33,7 +33,7 @@ These screenshots show what the mod adds in the game:
 These images show how your game files should look after installation:
 
 ![File structure example 1](./Images/4.png)
-- mods folder:
+mods folder:
 ![File structure example 2](./Images/5.png)
 
 ## Notes
@@ -42,5 +42,6 @@ These images show how your game files should look after installation:
 - Check game and MelonLoader versions if you have issues.
 
 - If you have any problems, please contact me on discord: dmtftf.
+
 
 
