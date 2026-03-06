@@ -15,6 +15,11 @@ packages/
 # Local/decompiled game files that should not be tracked
 UniverseLib.Mono.dll
 ZDEKOMPILOWANE Assembly-CSharp/
+0Harmony.dll
+ApproximatelyUpMOD.dll
+
+# CI packaging output
+dist/
 
 # MelonLoader runtime files
 MelonLoader/

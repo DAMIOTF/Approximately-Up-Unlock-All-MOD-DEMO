@@ -1,0 +1,80 @@
+name: Build and Release
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-release:
+    # Required because game DLL references are local and cannot be restored on GitHub-hosted runners.
+    runs-on: [self-hosted, windows]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v2
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Restore packages
+        run: nuget restore ApproximatelyUpMOD.slnx
+
+      - name: Build Release
+        shell: pwsh
+        env:
+          GAME_ROOT: ${{ vars.APPROX_UP_GAME_DIR }}
+          UNIVERSELIB_DLL: ${{ vars.APPROX_UP_UNIVERSELIB_DLL }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:GAME_ROOT)) {
+            throw "Repository variable APPROX_UP_GAME_DIR is not set."
+          }
+          if ([string]::IsNullOrWhiteSpace($env:UNIVERSELIB_DLL)) {
+            throw "Repository variable APPROX_UP_UNIVERSELIB_DLL is not set."
+          }
+
+          msbuild ApproximatelyUpMOD.csproj /t:Build /p:Configuration=Release /p:GameRootDir="$env:GAME_ROOT" /p:UniverseLibPath="$env:UNIVERSELIB_DLL"
+
+      - name: Pack release files
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path dist -Force | Out-Null
+          Copy-Item "bin/Release/ApproximatelyUpMOD.dll" "dist/ApproximatelyUpMOD.dll" -Force
+          if (Test-Path "bin/Release/ApproximatelyUpMOD.pdb") {
+            Copy-Item "bin/Release/ApproximatelyUpMOD.pdb" "dist/ApproximatelyUpMOD.pdb" -Force
+          }
+          if (Test-Path "bin/Release/ApproximatelyUpMOD.xml") {
+            Copy-Item "bin/Release/ApproximatelyUpMOD.xml" "dist/ApproximatelyUpMOD.xml" -Force
+          }
+          Compress-Archive -Path "dist/*" -DestinationPath "dist/ApproximatelyUpMOD-build.zip" -Force
+
+      - name: Move auto-build tag
+        shell: pwsh
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -f auto-build
+          git push origin refs/tags/auto-build --force
+
+      - name: Publish/Update Release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: auto-build
+          name: Auto Build (latest push)
+          allowUpdates: true
+          replacesArtifacts: true
+          artifactErrorsFailBuild: true
+          artifacts: dist/ApproximatelyUpMOD-build.zip,dist/ApproximatelyUpMOD.dll
+          body: |
+            Automated build from latest `main` push.
+            
+            Included artifacts:
+            - `ApproximatelyUpMOD-build.zip`
+            - `ApproximatelyUpMOD.dll`
