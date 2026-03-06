@@ -23,7 +23,7 @@ These screenshots show what the mod adds in the game:
 ## Installation
 
 1. Download Mod files -> [releases](https://github.com/DAMIOTF/Approximately-Up-MOD/releases/tag/Release)
-2. Install MelonLoader first (link above).
+2. Install MelonLoader ver: v0.7.1 Open-Beta first (link above).
 3. Open your game folder.
 4. Go to the `Mods` folder (create it if it does not exist).
 5. Copy the mod `.dll` files into the `Mods` folder.
@@ -77,7 +77,7 @@ From game folder (`ApproximatelyUp_Data/Managed`):
 
 From MelonLoader folder:
 
-- `MelonLoader.dll`
+- `MelonLoader.dll` ver: v0.7.1 Open-Beta
 
 ## Build steps
 
@@ -92,4 +92,5 @@ dotnet msbuild .\ApproximatelyUpMOD.csproj /t:Build /p:Configuration=Release /p:
 ```
 
 Compiled files are generated in `bin/Release`.
+
 
