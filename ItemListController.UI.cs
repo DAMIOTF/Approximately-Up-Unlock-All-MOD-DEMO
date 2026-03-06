@@ -357,7 +357,7 @@ namespace ApproximatelyUpMod
 
                 HorizontalLayoutGroup rowLayout = amountRow.AddComponent<HorizontalLayoutGroup>();
                 rowLayout.spacing = 6f;
-                rowLayout.childControlWidth = false;
+                rowLayout.childControlWidth = true;
                 rowLayout.childControlHeight = true;
                 rowLayout.childForceExpandWidth = false;
                 rowLayout.childForceExpandHeight = false;
@@ -385,6 +385,7 @@ namespace ApproximatelyUpMod
                 placeholderRect.offsetMax = new Vector2(-8f, -3f);
 
                 _materialsAmountInput = inputRoot.AddComponent<InputField>();
+                _materialsAmountInput.targetGraphic = inputBackground;
                 _materialsAmountInput.textComponent = inputText;
                 _materialsAmountInput.placeholder = placeholder;
                 _materialsAmountInput.characterLimit = 5;
@@ -393,7 +394,7 @@ namespace ApproximatelyUpMod
                 _materialsAmountInput.text = DefaultMaterialsAmount.ToString();
 
                 ButtonRef setButton = UIFactory.CreateButton(amountRow, "SetMaterialsButton", "Set amount", new Color(0.2f, 0.26f, 0.18f, 1f));
-                UIFactory.SetLayoutElement(setButton.GameObject, minWidth: 180, preferredWidth: 180, minHeight: 30, preferredHeight: 30);
+                UIFactory.SetLayoutElement(setButton.GameObject, minWidth: 230, preferredWidth: 230, minHeight: 30, preferredHeight: 30);
                 setButton.OnClick = (Action)Delegate.Combine(setButton.OnClick, (Action)delegate
                 {
                     ItemListController owner = OwnerController;
