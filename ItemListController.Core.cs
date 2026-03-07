@@ -59,6 +59,9 @@ namespace ApproximatelyUpMod
 
         private void Update()
         {
+            ThrusterPowerSystem.Tick();
+            SyncShipTearingOverride();
+
             if (Input.GetKeyDown(ToggleKey))
             {
                 ModLog.Info("Toggle key pressed (F10).");

@@ -101,10 +101,12 @@
   <ItemGroup>
     <Compile Include="HarmonyPatches.cs" />
     <Compile Include="ItemListController.Core.cs" />
+    <Compile Include="ItemListController.GameOverrides.cs" />
     <Compile Include="ItemListController.ItemsMaterials.cs" />
     <Compile Include="ItemListController.Teleport.cs" />
     <Compile Include="ItemListController.UI.cs" />
     <Compile Include="ModEntry.cs" />
+    <Compile Include="ThrusterPowerSystem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

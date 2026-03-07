@@ -151,6 +151,8 @@ namespace ApproximatelyUpMod
 
             private InputField _materialsAmountInput;
             private Text _foldoutText;
+            private Text _shipTearingToggleText;
+            private Text _playerGodmodeToggleText;
             private Text _itemsCountText;
             private Text _itemsLoadingText;
             private GameObject _itemsScrollView;
@@ -165,6 +167,12 @@ namespace ApproximatelyUpMod
             private GameObject _teleportPlanetsScrollView;
             private GameObject _teleportPlanetsScrollContent;
             private bool _teleportPlanetsExpanded;
+
+            private Text _thrusterPowerFoldoutText;
+            private GameObject _thrusterPowerScrollView;
+            private GameObject _thrusterPowerScrollContent;
+            private bool _thrusterPowerExpanded;
+            private int _lastThrusterPowerRevision = -1;
 
             private int _lastBuiltRevision = -1;
             private bool _itemsExpanded;
@@ -211,6 +219,9 @@ namespace ApproximatelyUpMod
                     new Color(0.1f, 0.1f, 0.11f, 0.96f));
                 UIFactory.SetLayoutElement(body, flexibleWidth: 9999, flexibleHeight: 9999);
 
+                GameObject safetySection = CreateSection(body, string.Empty);
+                BuildShipSafetyControls(safetySection);
+
                 GameObject resourcesSection = CreateSection(body, "Resources");
                 BuildMaterialsControls(resourcesSection);
 
@@ -219,6 +230,9 @@ namespace ApproximatelyUpMod
 
                 GameObject actionsSection = CreateSection(body, "Actions");
                 BuildActionsSection(actionsSection);
+
+                GameObject thrusterPowerSection = CreateSection(body, string.Empty);
+                BuildThrusterPowerSection(thrusterPowerSection);
 
                 GameObject teleportStationsSection = CreateSection(body, string.Empty);
                 BuildTeleportStationsSection(teleportStationsSection);
@@ -262,6 +276,11 @@ namespace ApproximatelyUpMod
                 if (_itemsLoadingText != null)
                 {
                     _itemsLoadingText.text = _cacheReady ? string.Empty : "Loading item list from Core...";
+                }
+
+                if (_lastThrusterPowerRevision != ThrusterPowerSystem.Revision)
+                {
+                    RebuildThrusterPowerControls();
                 }
             }
 
@@ -329,16 +348,19 @@ namespace ApproximatelyUpMod
 
                 HorizontalLayoutGroup rowLayout = amountRow.AddComponent<HorizontalLayoutGroup>();
                 rowLayout.spacing = 6f;
-                rowLayout.childControlWidth = false;
+                rowLayout.childControlWidth = true;
                 rowLayout.childControlHeight = true;
                 rowLayout.childForceExpandWidth = false;
                 rowLayout.childForceExpandHeight = false;
                 rowLayout.childAlignment = TextAnchor.MiddleLeft;
 
+                Text amountLabel = UIFactory.CreateLabel(amountRow, "SetMaterialsAmountLabel", "Amount:", TextAnchor.MiddleLeft, new Color(0.86f, 0.9f, 0.95f, 1f), true, 13);
+                UIFactory.SetLayoutElement(amountLabel.gameObject, minWidth: 62, preferredWidth: 62, minHeight: 30, preferredHeight: 30);
+
                 GameObject inputRoot = UIFactory.CreateUIObject("SetMaterialsInput", amountRow);
                 Image inputBackground = inputRoot.AddComponent<Image>();
-                inputBackground.color = new Color(0.09f, 0.1f, 0.12f, 1f);
-                UIFactory.SetLayoutElement(inputRoot, minWidth: 120, preferredWidth: 120, minHeight: 30, preferredHeight: 30);
+                inputBackground.color = new Color(0.08f, 0.09f, 0.11f, 1f);
+                UIFactory.SetLayoutElement(inputRoot, minWidth: 140, preferredWidth: 140, minHeight: 30, preferredHeight: 30);
 
                 Text inputText = UIFactory.CreateLabel(inputRoot, "SetMaterialsInputText", DefaultMaterialsAmount.ToString(), TextAnchor.MiddleCenter, new Color(0.92f, 0.96f, 1f, 1f), true, 14);
                 inputText.raycastTarget = false;
@@ -357,6 +379,7 @@ namespace ApproximatelyUpMod
                 placeholderRect.offsetMax = new Vector2(-8f, -3f);
 
                 _materialsAmountInput = inputRoot.AddComponent<InputField>();
+                _materialsAmountInput.targetGraphic = inputBackground;
                 _materialsAmountInput.textComponent = inputText;
                 _materialsAmountInput.placeholder = placeholder;
                 _materialsAmountInput.characterLimit = 5;
@@ -379,6 +402,76 @@ namespace ApproximatelyUpMod
 
                 Text hint = UIFactory.CreateLabel(section, "SetMaterialsHint", "Set all parts to value (max 99999)", TextAnchor.MiddleLeft, new Color(0.75f, 0.8f, 0.86f, 0.9f), true, 12);
                 UIFactory.SetLayoutElement(hint.gameObject, minHeight: 20, flexibleWidth: 9999);
+            }
+
+            private void BuildShipSafetyControls(GameObject section)
+            {
+                ButtonRef shipTearingButton = UIFactory.CreateButton(section, "ShipTearingToggle", string.Empty, new Color(0.26f, 0.18f, 0.18f, 1f));
+                UIFactory.SetLayoutElement(shipTearingButton.GameObject, minHeight: 30, flexibleWidth: 9999);
+                _shipTearingToggleText = shipTearingButton.ButtonText;
+
+                shipTearingButton.OnClick = (Action)Delegate.Combine(shipTearingButton.OnClick, (Action)delegate
+                {
+                    DisableShipTearingBySpeed = !DisableShipTearingBySpeed;
+
+                    ItemListController owner = OwnerController;
+                    owner?.SyncShipTearingOverride();
+                    RefreshShipSafetyControls(shipTearingButton, null);
+                });
+
+                ButtonRef godmodeButton = UIFactory.CreateButton(section, "PlayerGodmodeToggle", string.Empty, new Color(0.18f, 0.2f, 0.32f, 1f));
+                UIFactory.SetLayoutElement(godmodeButton.GameObject, minHeight: 30, flexibleWidth: 9999);
+                _playerGodmodeToggleText = godmodeButton.ButtonText;
+
+                godmodeButton.OnClick = (Action)Delegate.Combine(godmodeButton.OnClick, (Action)delegate
+                {
+                    EnablePlayerGodmode = !EnablePlayerGodmode;
+
+                    ItemListController owner = OwnerController;
+                    owner?.SyncShipTearingOverride();
+                    RefreshShipSafetyControls(null, godmodeButton);
+                });
+
+                RefreshShipSafetyControls(shipTearingButton, godmodeButton);
+            }
+
+            private void RefreshShipSafetyControls(ButtonRef shipTearingButton, ButtonRef godmodeButton)
+            {
+                if (_shipTearingToggleText != null)
+                {
+                    _shipTearingToggleText.text = DisableShipTearingBySpeed
+                        ? "[x] Disable ship tearing by speed"
+                        : "[ ] Disable ship tearing by speed";
+                }
+
+                if (_playerGodmodeToggleText != null)
+                {
+                    _playerGodmodeToggleText.text = EnablePlayerGodmode
+                        ? "[x] Godmode (prevent player death)"
+                        : "[ ] Godmode (prevent player death)";
+                }
+
+                if (shipTearingButton != null)
+                {
+                    Image image = shipTearingButton.GameObject.GetComponent<Image>();
+                    if (image != null)
+                    {
+                        image.color = DisableShipTearingBySpeed
+                            ? new Color(0.17f, 0.34f, 0.2f, 1f)
+                            : new Color(0.26f, 0.18f, 0.18f, 1f);
+                    }
+                }
+
+                if (godmodeButton != null)
+                {
+                    Image image = godmodeButton.GameObject.GetComponent<Image>();
+                    if (image != null)
+                    {
+                        image.color = EnablePlayerGodmode
+                            ? new Color(0.2f, 0.36f, 0.52f, 1f)
+                            : new Color(0.18f, 0.2f, 0.32f, 1f);
+                    }
+                }
             }
 
             private void BuildItemsSection(GameObject section)
@@ -422,6 +515,148 @@ namespace ApproximatelyUpMod
                 {
                     ItemListController owner = OwnerController;
                     owner?.TryRefreshItems(force: true);
+                });
+            }
+
+            private void BuildThrusterPowerSection(GameObject section)
+            {
+                ButtonRef foldoutButton = UIFactory.CreateButton(section, "ThrusterPowerFoldout", string.Empty, new Color(0.2f, 0.2f, 0.23f, 1f));
+                UIFactory.SetLayoutElement(foldoutButton.GameObject, minHeight: 28, flexibleWidth: 9999);
+                _thrusterPowerFoldoutText = foldoutButton.ButtonText;
+                foldoutButton.OnClick = (Action)Delegate.Combine(foldoutButton.OnClick, (Action)delegate
+                {
+                    _thrusterPowerExpanded = !_thrusterPowerExpanded;
+                    RefreshThrusterPowerFoldoutState();
+                });
+
+                UniverseLib.UI.Widgets.AutoSliderScrollbar autoScrollbar;
+                _thrusterPowerScrollView = UIFactory.CreateScrollView(section, "ThrusterPowerScrollView", out _thrusterPowerScrollContent, out autoScrollbar, new Color(0.11f, 0.12f, 0.14f, 1f));
+                UIFactory.SetLayoutElement(_thrusterPowerScrollView, minHeight: 190, preferredHeight: 190, flexibleHeight: 0, flexibleWidth: 9999);
+
+                Text hint = UIFactory.CreateLabel(
+                    section,
+                    "ThrusterPowerHint",
+                    "Use - and + to change engine force multiplier (range: 1x-10x).",
+                    TextAnchor.MiddleLeft,
+                    new Color(0.75f, 0.8f, 0.86f, 0.9f),
+                    true,
+                    12);
+                UIFactory.SetLayoutElement(hint.gameObject, minHeight: 20, flexibleWidth: 9999);
+
+                _thrusterPowerExpanded = false;
+                RefreshThrusterPowerFoldoutState();
+                RebuildThrusterPowerControls();
+            }
+
+            private void RebuildThrusterPowerControls()
+            {
+                if (_thrusterPowerScrollContent == null)
+                {
+                    return;
+                }
+
+                _lastThrusterPowerRevision = ThrusterPowerSystem.Revision;
+
+                for (int i = _thrusterPowerScrollContent.transform.childCount - 1; i >= 0; i--)
+                {
+                    Transform child = _thrusterPowerScrollContent.transform.GetChild(i);
+                    UnityEngine.Object.Destroy(child.gameObject);
+                }
+
+                var entries = ThrusterPowerSystem.GetUiEntries();
+                if (entries.Count == 0)
+                {
+                    Text empty = UIFactory.CreateLabel(
+                        _thrusterPowerScrollContent,
+                        "ThrusterPowerEmpty",
+                        "No active thrusters detected yet. Enter spaceship/build mode first.",
+                        TextAnchor.MiddleLeft,
+                        new Color(0.8f, 0.8f, 0.8f, 0.9f),
+                        true,
+                        13);
+                    UIFactory.SetLayoutElement(empty.gameObject, minHeight: 26, flexibleWidth: 9999);
+                    return;
+                }
+
+                for (int i = 0; i < entries.Count; i++)
+                {
+                    ThrusterPowerSystem.UiEntry entry = entries[i];
+                    CreateThrusterPowerRow(i, entry);
+                }
+            }
+
+            private void CreateThrusterPowerRow(int index, ThrusterPowerSystem.UiEntry entry)
+            {
+                GameObject row = UIFactory.CreateUIObject("ThrusterPowerRow_" + index, _thrusterPowerScrollContent);
+                UIFactory.SetLayoutElement(row, minHeight: 62, flexibleWidth: 9999);
+
+                VerticalLayoutGroup rowVertical = row.AddComponent<VerticalLayoutGroup>();
+                rowVertical.spacing = 4f;
+                rowVertical.padding = new RectOffset(2, 2, 2, 2);
+                rowVertical.childAlignment = TextAnchor.MiddleLeft;
+                rowVertical.childControlHeight = true;
+                rowVertical.childControlWidth = true;
+                rowVertical.childForceExpandHeight = false;
+                rowVertical.childForceExpandWidth = true;
+
+                Text nameLabel = UIFactory.CreateLabel(
+                    row,
+                    "ThrusterName_" + index,
+                    entry.Name,
+                    TextAnchor.MiddleLeft,
+                    new Color(0.92f, 0.96f, 1f, 0.98f),
+                    true,
+                    13);
+                UIFactory.SetLayoutElement(nameLabel.gameObject, minHeight: 20, flexibleWidth: 9999);
+
+                GameObject controls = UIFactory.CreateUIObject("ThrusterControls_" + index, row);
+                UIFactory.SetLayoutElement(controls, minHeight: 30, flexibleWidth: 9999);
+
+                HorizontalLayoutGroup controlsLayout = controls.AddComponent<HorizontalLayoutGroup>();
+                controlsLayout.spacing = 6f;
+                controlsLayout.childAlignment = TextAnchor.MiddleLeft;
+                controlsLayout.childControlHeight = true;
+                controlsLayout.childControlWidth = true;
+                controlsLayout.childForceExpandWidth = true;
+                controlsLayout.childForceExpandHeight = false;
+
+                ButtonRef minusButton = UIFactory.CreateButton(controls, "ThrusterMinus_" + index, "-", new Color(0.24f, 0.27f, 0.32f, 1f));
+                UIFactory.SetLayoutElement(minusButton.GameObject, minWidth: 28, preferredWidth: 28, minHeight: 24, preferredHeight: 24);
+
+                ButtonRef plusButton = UIFactory.CreateButton(controls, "ThrusterPlus_" + index, "+", new Color(0.24f, 0.27f, 0.32f, 1f));
+                UIFactory.SetLayoutElement(plusButton.GameObject, minWidth: 28, preferredWidth: 28, minHeight: 24, preferredHeight: 24);
+
+                Text valueLabel = UIFactory.CreateLabel(
+                    controls,
+                    "ThrusterValue_" + index,
+                    string.Empty,
+                    TextAnchor.MiddleCenter,
+                    new Color(0.93f, 0.98f, 0.93f, 1f),
+                    true,
+                    13);
+                UIFactory.SetLayoutElement(valueLabel.gameObject, minWidth: 120, preferredWidth: 120, minHeight: 24, preferredHeight: 24, flexibleWidth: 9999);
+
+                ulong prefabHash = entry.PrefabHash;
+                int currentMultiplier = Mathf.Clamp(Mathf.RoundToInt(entry.Multiplier), 1, 10);
+
+                Action syncValue = delegate
+                {
+                    valueLabel.text = "Power: x" + currentMultiplier;
+                    ThrusterPowerSystem.SetMultiplier(prefabHash, currentMultiplier);
+                };
+
+                syncValue();
+
+                minusButton.OnClick = (Action)Delegate.Combine(minusButton.OnClick, (Action)delegate
+                {
+                    currentMultiplier = Mathf.Max(1, currentMultiplier - 1);
+                    syncValue();
+                });
+
+                plusButton.OnClick = (Action)Delegate.Combine(plusButton.OnClick, (Action)delegate
+                {
+                    currentMultiplier = Mathf.Min(10, currentMultiplier + 1);
+                    syncValue();
                 });
             }
 
@@ -572,6 +807,19 @@ namespace ApproximatelyUpMod
                 if (_teleportPlanetsScrollView != null)
                 {
                     _teleportPlanetsScrollView.SetActive(_teleportPlanetsExpanded);
+                }
+            }
+
+            private void RefreshThrusterPowerFoldoutState()
+            {
+                if (_thrusterPowerFoldoutText != null)
+                {
+                    _thrusterPowerFoldoutText.text = _thrusterPowerExpanded ? "▼ Thruster power" : "▶ Thruster power";
+                }
+
+                if (_thrusterPowerScrollView != null)
+                {
+                    _thrusterPowerScrollView.SetActive(_thrusterPowerExpanded);
                 }
             }
         }
