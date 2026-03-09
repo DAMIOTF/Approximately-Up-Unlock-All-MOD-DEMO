@@ -83,7 +83,8 @@ Approximately Up Demo/
 ```
 
 ![File structure example 1](./Images/4.png)
-![File structure example 2](./Images/5.png)
+<img width="987" height="921" alt="obraz" src="https://github.com/user-attachments/assets/4e36858b-1b98-40ff-9e32-20cc6ca28eed" />
+
 
 ---
 
@@ -143,5 +144,6 @@ dotnet msbuild .\ApproximatelyUpMOD.csproj /t:Build /p:Configuration=Release `
 ```
 
 Output DLL: `bin/Release/ApproximatelyUpMOD.dll`
+
 
 
