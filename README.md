@@ -9,36 +9,45 @@ A MelonLoader mod for **Approximately Up (Demo)** that unlocks hidden game conte
 ## Features
 
 ### Item Unlocker
+
 Reveals all items present in the game files that are normally locked or inaccessible.  
 Use the **Items** section of the panel to browse and assign them to your hotbar with one click.
 
 ### Resources
+
 - Set a custom **materials amount** override (default 999, max 99999) applied when spawning items.
 - Toggle **Enforce Materials Amount** to keep the override active at all times.
 
 ### Building Grid
+
 - Enable/disable **grid snapping** for precise placement.
 - Toggle **placement collision** checking on or off.
 
 ### Thruster Power Override
+
 - Override the thrust output of every thruster on your ship per type (e.g. Ion Thruster, Plasma Thruster).
 - Values are applied in real-time to all placed thrusters; new ones are picked up within ~0.4 s.
 
 ### Teleport
+
 - **Teleport to station** — jump instantly to any docked station.
 - **Teleport to planet** — jump instantly to any planet in the current system.
 
 ### Electrics
+
 #### Wireless Transmitter Channels
+
 - Change the **maximum number of channels** available on wireless transmitters (default: 99, max: 9999).
 - Applied to all placed transmitters instantly; new ones picked up within ~0.4 s.
 
 #### Cable Max Power (P/s)
+
 - Override the **maximum power capacity** for each cable type: Power Cable, Power Nano Cable, Plasma Cable.
 - Default values are auto-discovered the first time you place a cable of that type.
 - Applied to all placed cables instantly; new ones are picked up within ~0.4 s.
 
 ### Ship Safety
+
 - Toggle **ship tearing** (structural integrity damage) on or off.
 
 ---
@@ -54,10 +63,10 @@ Use the **Items** section of the panel to browse and assign them to your hotbar 
 
 ## Requirements
 
-| Requirement | Version |
-|---|---|
+| Requirement                                                                                                                            | Version          |
+| -------------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
 | [MelonLoader](https://github.com/LavaGang/MelonLoader.Installer/blob/master/README.md#how-to-install-re-install-or-update-melonloader) | v0.7.1 Open-Beta |
-| Approximately Up (Demo) | build 34252973 |
+| Approximately Up (Demo)                                                                                                                | build 34252973   |
 
 ---
 
@@ -87,11 +96,11 @@ Approximately Up Demo/
 
 ## Troubleshooting
 
-| Problem | Fix |
-|---|---|
-| GUI does not appear | Copy all DLL files from `Mods/` into `UserLibs/` as well |
-| Mod does not load at all | Verify MelonLoader is installed correctly and is v0.7.1 Open-Beta |
-| Game crashes on startup | Check that the game version matches build 34252973 |
+| Problem                                       | Fix                                                                      |
+| --------------------------------------------- | ------------------------------------------------------------------------ |
+| GUI does not appear                           | Copy all DLL files from `Mods/` into `UserLibs/` as well                 |
+| Mod does not load at all                      | Verify MelonLoader is installed correctly and is v0.7.1 Open-Beta        |
+| Game crashes on startup                       | Check that the game version matches build 34252973                       |
 | Can't type in game (chat, search, blueprints) | Make sure you are using v2.3.0 or later — this was fixed in that release |
 
 For anything else, contact me on Discord: **dmtftf**
@@ -111,9 +120,11 @@ For anything else, contact me on Discord: **dmtftf**
 ### Dependencies
 
 **From NuGet** (automatically restored):
+
 - `0Harmony` 2.4.2 — [nuget.org](https://www.nuget.org/packages/Lib.Harmony)
 
 **From the game folder** (`ApproximatelyUp_Data/Managed`):
+
 - `Assembly-CSharp.dll`
 - `UnityEngine.CoreModule.dll`
 - `UnityEngine.InputLegacyModule.dll`
@@ -127,9 +138,11 @@ For anything else, contact me on Discord: **dmtftf**
 - `Unity.Physics.dll`
 
 **From the game's `Mods/` folder**:
+
 - `UniverseLib.Mono.dll` — [github.com/sinai-dev/UniverseLib](https://github.com/sinai-dev/UniverseLib/releases)
 
 **From the game's `MelonLoader/net6/` folder**:
+
 - `MelonLoader.dll`
 
 ### Build
@@ -141,6 +154,9 @@ dotnet msbuild .\ApproximatelyUpMOD.csproj /t:Build /p:Configuration=Release `
 ```
 
 Output DLL: `bin/Release/ApproximatelyUpMOD.dll`
+<<<<<<< HEAD
 
 
 
+=======
+>>>>>>> 6efaa5a (Wireless transmitter: auto-shrink font for 3- and 4-digit channel numbers via CRPText3D._maxWidth)

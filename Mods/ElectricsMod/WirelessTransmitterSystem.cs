@@ -53,6 +53,10 @@ namespace ApproximatelyUpMod
             NativeArray<Entity> entities = query.ToEntityArray(Allocator.Temp);
             query.Dispose();
 
+            // Width of two monospace digits at scale 1 (2 × 0.375 + 1 gap × 0.085).
+            // Used to activate the engine's built-in auto-shrink for 3- and 4-digit channels.
+            const float TwoDigitMonospaceWidth = 0.835f;
+
             int changed = 0;
             for (int i = 0; i < entities.Length; i++)
             {
@@ -69,19 +73,30 @@ namespace ApproximatelyUpMod
                     continue;
                 }
 
+                // ── channel count override ───────────────────────────────────
                 ActionableData ad = em.GetComponentData<ActionableData>(lever);
-                if (ad._roundingIntervals == desired)
+                if (ad._roundingIntervals != desired)
                 {
-                    continue;
+                    int currentChannel = ad.GetValueInterval().x;
+                    ad._roundingIntervals = desired;
+                    int clampedChannel = Math.Max(0, Math.Min(desired - 1, currentChannel));
+                    ad._value.x = (clampedChannel + 0.5f) / desired;
+                    em.SetComponentData(lever, ad);
+                    changed++;
                 }
 
-                // Preserve current channel position within the new range
-                int currentChannel = ad.GetValueInterval().x;
-                ad._roundingIntervals = desired;
-                int clampedChannel = Math.Max(0, Math.Min(desired - 1, currentChannel));
-                ad._value.x = (clampedChannel + 0.5f) / desired;
-                em.SetComponentData(lever, ad);
-                changed++;
+                // ── auto-shrink text for 3- and 4-digit channel numbers ──────
+                Entity textEntity = tx._text3DRendererEntity;
+                if (textEntity != Entity.Null && em.Exists(textEntity) && em.HasComponent<CRPText3D>(textEntity))
+                {
+                    CRPText3D t3d = em.GetComponentData<CRPText3D>(textEntity);
+                    // Only activate when the prefab left _maxWidth at 0 (no existing limit).
+                    if (t3d._maxWidth < 0.01f)
+                    {
+                        t3d._maxWidth = TwoDigitMonospaceWidth * t3d._baseScale;
+                        em.SetComponentData(textEntity, t3d);
+                    }
+                }
             }
 
             entities.Dispose();
