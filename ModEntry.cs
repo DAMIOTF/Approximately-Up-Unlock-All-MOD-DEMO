@@ -3,7 +3,7 @@ using MelonLoader;
 using System;
 using UnityEngine;
 
-[assembly: MelonInfo(typeof(ApproximatelyUpMod.ModEntry), "ApproximatelyUpMod", "2.0.0", "discord: dmtftf")]
+[assembly: MelonInfo(typeof(ApproximatelyUpMod.ModEntry), "ApproximatelyUpMod", "2.2.0", "discord: dmtftf")]
 [assembly: MelonGame(null, null)]
 
 namespace ApproximatelyUpMod
