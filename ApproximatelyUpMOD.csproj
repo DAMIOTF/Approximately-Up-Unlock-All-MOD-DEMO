@@ -12,6 +12,7 @@
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
+    <LangVersion>8.0</LangVersion>
     <GameRootDir Condition="'$(GameRootDir)' == ''">..\..\SteamLibrary\steamapps\common\Approximately Up Demo</GameRootDir>
     <ManagedDir>$(GameRootDir)\ApproximatelyUp_Data\Managed</ManagedDir>
     <MelonLoaderDir>$(GameRootDir)\MelonLoader\net6</MelonLoaderDir>
@@ -25,6 +26,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -33,6 +35,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="0Harmony, Version=2.4.2.0, Culture=neutral, processorArchitecture=MSIL">
@@ -40,6 +43,10 @@
     </Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>$(ManagedDir)\Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="com.rlabrecque.steamworks.net">
+      <HintPath>$(ManagedDir)\com.rlabrecque.steamworks.net.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="MelonLoader">
@@ -94,26 +101,44 @@
       <HintPath>$(ManagedDir)\Unity.Mathematics.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Unity.Physics">
+      <HintPath>$(ManagedDir)\Unity.Physics.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="UniverseLib.Mono">
       <HintPath>$(UniverseLibPath)</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="HarmonyPatches.cs" />
-    <Compile Include="ItemListController.Core.cs" />
-    <Compile Include="ItemListController.GameOverrides.cs" />
-    <Compile Include="ItemListController.ItemsMaterials.cs" />
-    <Compile Include="ItemListController.Teleport.cs" />
-    <Compile Include="ItemListController.UI.cs" />
+    <!-- Core -->
     <Compile Include="ModEntry.cs" />
-    <Compile Include="ThrusterPowerSystem.cs" />
+    <Compile Include="ItemListController.Core.cs" />
+    <Compile Include="ItemListController.UI.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <!-- Mods\BuildingGridMod -->
+    <Compile Include="Mods\BuildingGridMod\BuildingModConfig.cs" />
+    <Compile Include="Mods\BuildingGridMod\BuildingRuntimeOverrides.cs" />
+    <Compile Include="Mods\BuildingGridMod\BurstCompatibility.cs" />
+    <Compile Include="Mods\BuildingGridMod\GridSnappingPatch.cs" />
+    <Compile Include="Mods\BuildingGridMod\ModUI.cs" />
+    <Compile Include="Mods\BuildingGridMod\PatchDiagnostics.cs" />
+    <Compile Include="Mods\BuildingGridMod\PlacementCollisionPatch.cs" />
+    <!-- Mods\GameOverridesMod -->
+    <Compile Include="Mods\GameOverridesMod\GameOverridesSystem.cs" />
+    <Compile Include="Mods\GameOverridesMod\GameOverridesUI.cs" />
+    <!-- Mods\MaterialsMod -->
+    <Compile Include="Mods\MaterialsMod\MaterialsPatches.cs" />
+    <Compile Include="Mods\MaterialsMod\MaterialsSystem.cs" />
+    <Compile Include="Mods\MaterialsMod\MaterialsUI.cs" />
+    <!-- Mods\TeleportMod -->
+    <Compile Include="Mods\TeleportMod\TeleportSystem.cs" />
+    <Compile Include="Mods\TeleportMod\TeleportUI.cs" />
+    <!-- Mods\ThrusterPowerMod -->
+    <Compile Include="Mods\ThrusterPowerMod\ThrusterPowerSystem.cs" />
+    <Compile Include="Mods\ThrusterPowerMod\ThrusterPowerUI.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="ModdingCore.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -61,6 +61,7 @@ namespace ApproximatelyUpMod
         {
             ThrusterPowerSystem.Tick();
             SyncShipTearingOverride();
+            BuildingRuntimeOverrides.Tick();
 
             if (Input.GetKeyDown(ToggleKey))
             {

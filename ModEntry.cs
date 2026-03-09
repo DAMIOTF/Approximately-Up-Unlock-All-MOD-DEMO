@@ -36,9 +36,12 @@ namespace ApproximatelyUpMod
         {
             try
             {
+                BurstCompatibility.TryDisableBurstForHarmony();
+
                 var harmony = new HarmonyLib.Harmony("com.ApproximatelyUp.Mod");
                 harmony.PatchAll();
                 ModLog.Info("Harmony patches initialized.");
+                PatchDiagnostics.LogPatchTargetsAndIl(harmony);
 
                 MelonEvents.OnSceneWasLoaded.Subscribe(OnSceneLoaded);
                 ModLog.Info("Subscribed to scene load events.");
