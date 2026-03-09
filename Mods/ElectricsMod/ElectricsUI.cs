@@ -10,10 +10,10 @@ namespace ApproximatelyUpMod
     {
         private sealed partial class FlatModPanel
         {
-            private InputField _wirelessChannelsInput;
+            private InputFieldRef _wirelessChannelsInput;
             private Text _wirelessChannelsStatusText;
 
-            private InputField[] _cablePowerInputs;
+            private InputFieldRef[] _cablePowerInputs;
             private Text[] _cablePowerDefaultTexts;
             private int _lastCableDiscoveryRevision = -1;
 
@@ -44,9 +44,10 @@ namespace ApproximatelyUpMod
                 wirelessApplyButton.OnClick = (Action)Delegate.Combine(wirelessApplyButton.OnClick, (Action)delegate
                 {
                     int value;
-                    if (_wirelessChannelsInput != null && int.TryParse(_wirelessChannelsInput.text.Trim(), out value))
+                    if (_wirelessChannelsInput != null && int.TryParse(_wirelessChannelsInput.Component.text.Trim(), out value))
                     {
                         WirelessTransmitterSystem.SetMaxChannels(value);
+                        SyncWirelessInputToCurrentValue();
                         RefreshWirelessChannelsDisplay();
                     }
                 });
@@ -56,6 +57,7 @@ namespace ApproximatelyUpMod
                 wirelessResetButton.OnClick = (Action)Delegate.Combine(wirelessResetButton.OnClick, (Action)delegate
                 {
                     WirelessTransmitterSystem.Reset();
+                    SyncWirelessInputToCurrentValue();
                     RefreshWirelessChannelsDisplay();
                 });
 
@@ -73,7 +75,7 @@ namespace ApproximatelyUpMod
                 UIFactory.SetLayoutElement(cableTitle.gameObject, minHeight: 22, flexibleWidth: 9999);
 
                 CablePowerSystem.CableTypeEntry[] entries = CablePowerSystem.Entries;
-                _cablePowerInputs = new InputField[entries.Length];
+                _cablePowerInputs = new InputFieldRef[entries.Length];
                 _cablePowerDefaultTexts = new Text[entries.Length];
 
                 for (int idx = 0; idx < entries.Length; idx++)
@@ -104,9 +106,9 @@ namespace ApproximatelyUpMod
                     UIFactory.SetLayoutElement(applyButton.GameObject, minWidth: 60, preferredWidth: 60, minHeight: 28, preferredHeight: 28);
                     applyButton.OnClick = (Action)Delegate.Combine(applyButton.OnClick, (Action)delegate
                     {
-                        InputField input = _cablePowerInputs[capturedIdx];
+                        InputFieldRef input = _cablePowerInputs[capturedIdx];
                         float value;
-                        if (input != null && float.TryParse(input.text.Trim(), out value) && value > 0f)
+                        if (input != null && float.TryParse(input.Component.text.Trim(), out value) && value > 0f)
                         {
                             CablePowerSystem.Entries[capturedIdx].OverrideMaxPower = value;
                             CablePowerSystem.ForceRescan();
@@ -137,37 +139,17 @@ namespace ApproximatelyUpMod
                 UIFactory.SetLayoutElement(hint.gameObject, minHeight: 20, flexibleWidth: 9999);
             }
 
-            private InputField CreateNumberInput(GameObject parent, string name, string defaultText, int maxLen)
+            private InputFieldRef CreateNumberInput(GameObject parent, string name, string defaultText, int maxLen)
             {
-                GameObject inputRoot = UIFactory.CreateUIObject(name, parent);
-                Image bg = inputRoot.AddComponent<Image>();
-                bg.color = new Color(0.08f, 0.09f, 0.11f, 1f);
-                UIFactory.SetLayoutElement(inputRoot, minWidth: 90, preferredWidth: 90, minHeight: 28, preferredHeight: 28);
-
-                Text inputText = UIFactory.CreateLabel(inputRoot, name + "Text", defaultText, TextAnchor.MiddleCenter, new Color(0.92f, 0.96f, 1f, 1f), true, 13);
-                inputText.raycastTarget = false;
-                RectTransform inputTextRect = inputText.rectTransform;
-                inputTextRect.anchorMin = Vector2.zero;
-                inputTextRect.anchorMax = Vector2.one;
-                inputTextRect.offsetMin = new Vector2(6f, 2f);
-                inputTextRect.offsetMax = new Vector2(-6f, -2f);
-
-                Text placeholder = UIFactory.CreateLabel(inputRoot, name + "Placeholder", "number", TextAnchor.MiddleCenter, new Color(0.6f, 0.66f, 0.73f, 0.6f), true, 12);
-                placeholder.raycastTarget = false;
-                RectTransform phRect = placeholder.rectTransform;
-                phRect.anchorMin = Vector2.zero;
-                phRect.anchorMax = Vector2.one;
-                phRect.offsetMin = new Vector2(6f, 2f);
-                phRect.offsetMax = new Vector2(-6f, -2f);
-
-                InputField field = inputRoot.AddComponent<InputField>();
-                field.targetGraphic = bg;
-                field.textComponent = inputText;
-                field.placeholder = placeholder;
-                field.characterLimit = maxLen;
-                field.contentType = InputField.ContentType.IntegerNumber;
-                field.lineType = InputField.LineType.SingleLine;
-                field.text = defaultText;
+                InputFieldRef field = UIFactory.CreateInputField(parent, name, "number...");
+                UIFactory.SetLayoutElement(field.GameObject, minWidth: 90, preferredWidth: 90, minHeight: 28, preferredHeight: 28);
+                field.Component.characterLimit = maxLen;
+                field.Component.contentType = InputField.ContentType.DecimalNumber;
+                field.Component.lineType = InputField.LineType.SingleLine;
+                if (!string.IsNullOrEmpty(defaultText))
+                {
+                    field.Component.text = defaultText;
+                }
                 return field;
             }
 
@@ -190,10 +172,13 @@ namespace ApproximatelyUpMod
                     _wirelessChannelsStatusText.text =
                         $"Current: {WirelessTransmitterSystem.DesiredMaxChannels} channels  (default: {WirelessTransmitterSystem.DefaultMaxChannels})";
                 }
+            }
 
+            private void SyncWirelessInputToCurrentValue()
+            {
                 if (_wirelessChannelsInput != null)
                 {
-                    _wirelessChannelsInput.text = WirelessTransmitterSystem.DesiredMaxChannels.ToString();
+                    _wirelessChannelsInput.Component.text = WirelessTransmitterSystem.DesiredMaxChannels.ToString();
                 }
             }
 

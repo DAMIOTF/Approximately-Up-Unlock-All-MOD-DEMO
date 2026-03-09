@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 using UniverseLib;
+using UniverseLib.Config;
 using UniverseLib.UI;
 using UniverseLib.UI.Models;
 using UniverseLib.UI.Panels;
@@ -41,7 +42,15 @@ namespace ApproximatelyUpMod
             {
                 _universeInitRequested = true;
                 ModLog.Info("Initializing UniverseLib UI...");
-                Universe.Init(OnUniverseInitialized, UniverseLog);
+                Universe.Init(0f, OnUniverseInitialized, UniverseLog, new UniverseLibConfig
+                {
+                    // Don't replace the game's EventSystem — prevents keyboard input being
+                    // swallowed by UniverseLib and breaking game chat/search/blueprint naming.
+                    Disable_EventSystem_Override = true,
+                    // Allow clicks outside the mod panel to reach game UI normally.
+                    Allow_UI_Selection_Outside_UIBase = true,
+                    Force_Unlock_Mouse = false,
+                });
                 return;
             }
 
@@ -161,7 +170,7 @@ namespace ApproximatelyUpMod
 
             public override string Name => "Approximately Up MOD by: DMTF";
             public override int MinWidth => 460;
-            public override int MinHeight => 640;
+            public override int MinHeight => 300;
             public override Vector2 DefaultAnchorMin => new Vector2(0f, 1f);
             public override Vector2 DefaultAnchorMax => new Vector2(0f, 1f);
             public override Vector2 DefaultPosition => new Vector2(20f, -20f);
@@ -189,17 +198,30 @@ namespace ApproximatelyUpMod
 
             protected override void ConstructPanelContent()
             {
-                GameObject body = UIFactory.CreateVerticalGroup(
-                    ContentRoot,
-                    "Body",
-                    false,
-                    false,
-                    true,
-                    true,
-                    8,
-                    new Vector4(10f, 10f, 10f, 10f),
+                // Outer wrapper: scroll area (flex) + pinned footer (fixed)
+                GameObject outer = UIFactory.CreateVerticalGroup(
+                    ContentRoot, "Outer",
+                    false, false, true, true,
+                    0, Vector4.zero,
                     new Color(0.1f, 0.1f, 0.11f, 0.96f));
-                UIFactory.SetLayoutElement(body, flexibleWidth: 9999, flexibleHeight: 9999);
+                UIFactory.SetLayoutElement(outer, flexibleWidth: 9999, flexibleHeight: 9999);
+
+                // Scrollable content area
+                UniverseLib.UI.Widgets.AutoSliderScrollbar mainScrollbar;
+                GameObject scrollContent;
+                GameObject mainScroll = UIFactory.CreateScrollView(
+                    outer, "MainScroll",
+                    out scrollContent, out mainScrollbar,
+                    new Color(0.1f, 0.1f, 0.11f, 0f));
+                UIFactory.SetLayoutElement(mainScroll, flexibleWidth: 9999, flexibleHeight: 9999);
+
+                // Body with padding/spacing lives inside the scroll content
+                GameObject body = UIFactory.CreateVerticalGroup(
+                    scrollContent, "Body",
+                    false, false, true, true,
+                    8, new Vector4(10f, 10f, 10f, 10f),
+                    new Color(0.1f, 0.1f, 0.11f, 0f));
+                UIFactory.SetLayoutElement(body, flexibleWidth: 9999);
 
                 GameObject safetySection = CreateSection(body, string.Empty);
                 BuildShipSafetyControls(safetySection);
@@ -228,20 +250,15 @@ namespace ApproximatelyUpMod
                 GameObject electricsSection = CreateSection(body, string.Empty);
                 BuildElectricsSection(electricsSection);
 
-                GameObject spacer = UIFactory.CreateUIObject("FooterSpacer", body);
-                UIFactory.SetLayoutElement(spacer, flexibleHeight: 9999, minHeight: 4);
-
+                // Footer pinned below the scroll area
                 GameObject footerSection = UIFactory.CreateVerticalGroup(
-                    body,
-                    "FooterSection",
-                    false,
-                    false,
-                    true,
-                    true,
-                    0,
-                    new Vector4(8f, 8f, 8f, 8f),
+                    outer, "FooterSection",
+                    false, false, true, true,
+                    0, new Vector4(8f, 8f, 8f, 8f),
                     new Color(0.14f, 0.14f, 0.15f, 1f));
-                Text footer = UIFactory.CreateLabel(footerSection, "FooterText", "discord: dmtftf", TextAnchor.MiddleCenter, new Color(1f, 1f, 1f, 0.9f), true, 14);
+                UIFactory.SetLayoutElement(footerSection, flexibleWidth: 9999, flexibleHeight: 0);
+                Text footer = UIFactory.CreateLabel(footerSection, "FooterText", "discord: dmtftf",
+                    TextAnchor.MiddleCenter, new Color(1f, 1f, 1f, 0.9f), true, 14);
                 UIFactory.SetLayoutElement(footer.gameObject, flexibleWidth: 9999, minHeight: 24);
 
                 SyncRuntimeState();
