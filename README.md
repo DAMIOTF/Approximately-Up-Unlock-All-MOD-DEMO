@@ -23,7 +23,6 @@ Use the **Items** section of the panel to browse and assign them to your hotbar 
 ### Thruster Power Override
 - Override the thrust output of every thruster on your ship per type (e.g. Ion Thruster, Plasma Thruster).
 - Values are applied in real-time to all placed thrusters; new ones are picked up within ~0.4 s.
-- **Reset** button restores original game values per type.
 
 ### Teleport
 - **Teleport to station** — jump instantly to any docked station.
@@ -144,4 +143,5 @@ dotnet msbuild .\ApproximatelyUpMOD.csproj /t:Build /p:Configuration=Release `
 ```
 
 Output DLL: `bin/Release/ApproximatelyUpMOD.dll`
+
 
