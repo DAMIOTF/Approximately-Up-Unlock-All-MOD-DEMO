@@ -18,7 +18,7 @@ Use the **Items** section of the panel to browse and assign them to your hotbar 
 - Set a custom **materials amount** override (default 999, max 99999) applied when spawning items.
 - Toggle **Enforce Materials Amount** to keep the override active at all times.
 
-### Building Grid
+### ~~Building Grid~~
 
 - ~~Enable/disable **grid snapping** for precise placement.~~
 - ~~Toggle **placement collision** checking on or off.~~
@@ -158,4 +158,5 @@ Output DLL: `bin/Release/ApproximatelyUpMOD.dll`
 
 =======
 >>>>>>> 6efaa5a (Wireless transmitter: auto-shrink font for 3- and 4-digit channel numbers via CRPText3D._maxWidth)
+
 
